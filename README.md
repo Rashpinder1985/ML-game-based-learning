@@ -5,12 +5,23 @@ A comprehensive monorepo for game-based machine learning education with interact
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker and Docker Compose
 - Python 3.11+
-- Node.js LTS
-- Make (optional)
+- Node.js LTS (18 or newer)
+- PostgreSQL 14+ (local install or managed service)
+- Redis (optional, only needed for advanced features)
+- Docker & Docker Compose (optional, for container workflow)
 
-### Setup Commands
+### Environment Variables
+Copy the sample env files and adjust values for your machine:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+Update `backend/.env` with your Postgres/Redis credentials. The frontend `.env` controls the API base URL (`http://localhost:8002` for local development).
+
+### Setup Commands (Docker workflow)
 
 ```bash
 # 1. Start all services
@@ -24,6 +35,34 @@ make seed
 # API: http://localhost:8000
 # Grafana: http://localhost:3001 (admin/admin)
 ```
+
+### Manual Local Setup (without Docker)
+
+```bash
+# 1. Ensure Postgres is running (example uses Homebrew services)
+brew services start postgresql@14
+
+# 2. Seed the database
+psql -U <your-user> -f infra/init.sql postgres
+
+# 3. Create a virtual environment and install backend deps
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r backend/requirements.txt
+
+# 4. Install frontend dependencies
+cd frontend && npm install && cd ..
+
+# 5. Start the backend API on a free port (e.g., 8002)
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8002
+
+# 6. In a new terminal start the frontend (Vite auto-selects a port)
+cd frontend
+npm run dev
+```
+
+> **Tip:** If ports 8000/8001 are already taken (Docker Desktop often uses them), start the backend on another port (e.g., `8002`) and update `frontend/.env` to match.
 
 ### Development Commands
 
