@@ -6,6 +6,21 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'ml_learning')\gexec
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Reset auth-related tables to ensure schema matches application expectations
+DROP TABLE IF EXISTS progress CASCADE;
+DROP TABLE IF EXISTS submissions CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    full_name VARCHAR(255),
+    hashed_password VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS lessons (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -18,7 +33,35 @@ CREATE TABLE IF NOT EXISTS lessons (
     updated_at TIMESTAMPTZ
 );
 
-TRUNCATE TABLE lessons RESTART IDENTITY;
+CREATE TABLE IF NOT EXISTS submissions (
+    id SERIAL PRIMARY KEY,
+    lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    code TEXT NOT NULL,
+    language VARCHAR(50) DEFAULT 'python',
+    status VARCHAR(50) DEFAULT 'pending',
+    result JSONB,
+    job_id VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS progress (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'not_started',
+    score INTEGER DEFAULT 0,
+    attempts INTEGER DEFAULT 0,
+    best_submission_id INTEGER REFERENCES submissions(id) ON DELETE SET NULL,
+    progress_metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
+);
+
+ TRUNCATE TABLE progress RESTART IDENTITY CASCADE;
+ TRUNCATE TABLE submissions RESTART IDENTITY CASCADE;
+TRUNCATE TABLE lessons RESTART IDENTITY CASCADE;
 
 INSERT INTO lessons (title, description, content, difficulty, module) VALUES
     (

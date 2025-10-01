@@ -64,6 +64,18 @@ npm run dev
 
 > **Tip:** If ports 8000/8001 are already taken (Docker Desktop often uses them), start the backend on another port (e.g., `8002`) and update `frontend/.env` to match.
 
+### Authentication
+
+- Register a user: `POST /api/v1/auth/register` (JSON body `{ "email": "you@example.com", "password": "...", "full_name": "Optional" }`).
+- Log in: `POST /api/v1/auth/login/json` to receive a bearer token, or use form data against `/api/v1/auth/login`.
+- Attach the token to subsequent requests via the `Authorization: Bearer <token>` header.
+- The `/api/v1/auth/me` endpoint returns the current user profile.
+
+The frontend stores the token in `localStorage` and automatically sends it with API calls. Signing out clears the token.
+
+_Note: running `infra/init.sql` will reset auth-related tables (users, submissions, progress). Re-register accounts after reseeding._
+
+
 ### Development Commands
 
 ```bash

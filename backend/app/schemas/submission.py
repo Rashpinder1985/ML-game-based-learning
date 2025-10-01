@@ -4,7 +4,6 @@ from datetime import datetime
 
 class SubmissionCreate(BaseModel):
     lesson_id: int
-    user_id: str
     code: str
     language: str = "python"
 
@@ -17,7 +16,7 @@ class SubmissionResult(BaseModel):
 class Submission(BaseModel):
     id: int
     lesson_id: int
-    user_id: str
+    user_id: int
     code: str
     language: str
     status: str

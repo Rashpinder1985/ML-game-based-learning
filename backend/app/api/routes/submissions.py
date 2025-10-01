@@ -1,14 +1,17 @@
+from datetime import datetime
+import uuid
+
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
-from typing import List
-import httpx
-import uuid
-from datetime import datetime
-from app.core.database import get_db
+
 from app.core.config import settings
-from app.models.submission import Submission as SubmissionModel
+from app.core.database import get_db
+from app.core.deps import get_current_active_user
 from app.models.job import Job as JobModel
-from app.schemas.submission import Submission, SubmissionCreate, SubmissionResult
+from app.models.submission import Submission as SubmissionModel
+from app.models.user import User
+from app.schemas.submission import Submission, SubmissionCreate
 
 router = APIRouter()
 
@@ -67,13 +70,14 @@ async def submit_to_runner(submission_id: int, code: str, language: str):
 async def submit_code(
     submission_data: SubmissionCreate,
     background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Submit code for execution"""
     # Create submission record
     submission = SubmissionModel(
         lesson_id=submission_data.lesson_id,
-        user_id=submission_data.user_id,
+        user_id=current_user.id,
         code=submission_data.code,
         language=submission_data.language,
         status="pending"
@@ -94,9 +98,16 @@ async def submit_code(
     return submission
 
 @router.get("/submissions/{submission_id}", response_model=Submission)
-async def get_submission(submission_id: int, db: Session = Depends(get_db)):
+async def get_submission(
+    submission_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     """Get submission by ID"""
-    submission = db.query(SubmissionModel).filter(SubmissionModel.id == submission_id).first()
+    submission = db.query(SubmissionModel).filter(
+        SubmissionModel.id == submission_id,
+        SubmissionModel.user_id == current_user.id
+    ).first()
     
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")

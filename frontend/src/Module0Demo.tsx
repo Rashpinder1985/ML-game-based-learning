@@ -1,5 +1,6 @@
 import React from 'react'
 import QuestInterface from './components/QuestInterface'
+import AuthGate from './components/AuthGate'
 
 function Module0Demo() {
   return (
@@ -35,7 +36,9 @@ function Module0Demo() {
       </header>
 
       <main>
-        <QuestInterface />
+        <AuthGate>
+          <QuestInterface />
+        </AuthGate>
       </main>
 
       <footer style={{

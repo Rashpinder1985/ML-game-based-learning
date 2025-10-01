@@ -7,7 +7,7 @@ class Progress(Base):
     __tablename__ = "progress"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String(100), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
     status = Column(String(50), default="not_started")  # not_started, in_progress, completed
     score = Column(Integer, default=0)
@@ -20,3 +20,4 @@ class Progress(Base):
     # Relationships
     lesson = relationship("Lesson")
     best_submission = relationship("Submission")
+    user = relationship("User", back_populates="progress")

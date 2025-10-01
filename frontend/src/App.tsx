@@ -73,7 +73,6 @@ function App() {
     try {
       const submission = await apiService.submitCode({
         lesson_id: selectedLesson.id,
-        user_id: userId,
         code,
         language
       })
@@ -110,7 +109,6 @@ function App() {
     try {
       await apiService.submitCode({
         lesson_id: selectedLesson.id,
-        user_id: userId,
         code,
         language
       })

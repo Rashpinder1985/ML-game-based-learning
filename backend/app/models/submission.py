@@ -8,7 +8,7 @@ class Submission(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
-    user_id = Column(String(100), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     code = Column(Text, nullable=False)
     language = Column(String(50), default="python")
     status = Column(String(50), default="pending")  # pending, running, completed, failed
@@ -19,3 +19,4 @@ class Submission(Base):
     
     # Relationships
     lesson = relationship("Lesson", back_populates="submissions")
+    user = relationship("User", back_populates="submissions")
