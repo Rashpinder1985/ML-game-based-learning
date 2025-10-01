@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ml-learning-backend"
+version = "0.1.0"
+description = "ML Game-Based Learning Backend API"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.104.1",
+    "uvicorn[standard]==0.24.0",
+    "sqlalchemy==2.0.23",
+    "alembic==1.12.1",
+    "psycopg2-binary==2.9.9",
+    "pydantic==2.5.0",
+    "pydantic-settings==2.1.0",
+    "redis==5.0.1",
+    "python-multipart==0.0.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==7.4.3",
+    "pytest-asyncio==0.21.1",
+    "httpx==0.25.2",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
