@@ -229,7 +229,7 @@ export const ChallengeInterface: React.FC<ChallengeInterfaceProps> = ({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .challenge-interface {
           background: rgba(255, 255, 255, 0.05);
           border-radius: 15px;

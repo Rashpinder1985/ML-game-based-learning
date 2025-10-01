@@ -1,4 +1,3 @@
-import React from 'react'
 import QuestInterface from './components/QuestInterface'
 import AuthGate from './components/AuthGate'
 

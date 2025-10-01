@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GameMechanics from './GameMechanics'
 import ChallengeInterface from './ChallengeInterface'
@@ -671,7 +671,7 @@ export const QuestInterface: React.FC = () => {
         )}
       </motion.div>
 
-      <style jsx>{`
+      <style>{`
         .quest-interface {
           max-width: 900px;
           margin: 0 auto;

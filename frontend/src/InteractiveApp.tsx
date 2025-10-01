@@ -223,7 +223,7 @@ function InteractiveApp() {
             </h2>
 
             <div style={{ display: 'grid', gap: '20px' }}>
-              {lessons.map((lesson, index) => (
+              {lessons.map((lesson) => (
                 <div
                   key={lesson.id}
                   onClick={() => handleSelectLesson(lesson)}

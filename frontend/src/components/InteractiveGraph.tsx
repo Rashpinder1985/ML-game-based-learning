@@ -41,17 +41,6 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null)
 
-  const pixelToCoordinate = (pixelX: number, pixelY: number): Point => {
-    const canvas = canvasRef.current
-    if (!canvas) return { x: 0, y: 0 }
-
-    const rect = canvas.getBoundingClientRect()
-    const x = ((pixelX - rect.left) / canvas.width) * (xRange[1] - xRange[0]) + xRange[0]
-    const y = yRange[1] - ((pixelY - rect.top) / canvas.height) * (yRange[1] - yRange[0])
-
-    return { x, y }
-  }
-
   const coordinateToPixel = (x: number, y: number): [number, number] => {
     const pixelX = ((x - xRange[0]) / (xRange[1] - xRange[0])) * width
     const pixelY = ((yRange[1] - y) / (yRange[1] - yRange[0])) * height
@@ -208,7 +197,6 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
 
     const clickX = event.clientX - rect.left
     const clickY = event.clientY - rect.top
-    const clickPoint = pixelToCoordinate(event.clientX, event.clientY)
 
     // Check if click is near any point
     points.forEach(point => {
@@ -267,7 +255,7 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .interactive-graph {
           background: rgba(0, 0, 0, 0.3);
           border-radius: 10px;

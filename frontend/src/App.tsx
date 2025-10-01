@@ -71,7 +71,7 @@ function App() {
     setResult(null)
 
     try {
-      const submission = await apiService.submitCode({
+      await apiService.submitCode({
         lesson_id: selectedLesson.id,
         code,
         language
@@ -134,7 +134,7 @@ function App() {
     }
   }
 
-  const handleVisualizationComplete = (data: any) => {
+  const handleVisualizationComplete = () => {
     if (gameInterfaceRef.current) {
       gameInterfaceRef.current.addXP(25, 'Data visualization mastery')
     }
@@ -188,7 +188,6 @@ function App() {
           ref={gameInterfaceRef}
           userId={userId}
           onLevelUp={(level) => console.log('Level up!', level)}
-          onAchievementUnlocked={(achievement) => console.log('Achievement!', achievement)}
         />
 
         {/* Navigation */}

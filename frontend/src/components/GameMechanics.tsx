@@ -210,7 +210,7 @@ export const GameMechanics = React.forwardRef<any, GameMechanicsProps>(({
       </AnimatePresence>
 
 
-      <style jsx>{`
+      <style>{`
         .game-mechanics {
           position: relative;
         }

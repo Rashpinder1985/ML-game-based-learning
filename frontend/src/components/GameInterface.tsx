@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, Trophy, Zap, Target, TrendingUp, Award, Code, PlayCircle } from 'lucide-react'
+import { Star, Zap, Target, TrendingUp, Award, Code, PlayCircle } from 'lucide-react'
 
 interface Achievement {
   id: string
@@ -24,7 +24,6 @@ interface GameStats {
 interface GameInterfaceProps {
   userId: string
   onLevelUp?: (newLevel: number) => void
-  onAchievementUnlocked?: (achievement: Achievement) => void
 }
 
 export interface GameInterfaceHandle {
@@ -32,10 +31,9 @@ export interface GameInterfaceHandle {
   addXP: (xpAmount: number, reason?: string) => void
 }
 
-export const GameInterface = forwardRef<GameInterfaceHandle, GameInterfaceProps>(({
+export const GameInterface = forwardRef<GameInterfaceHandle, GameInterfaceProps>(({ 
   userId,
-  onLevelUp,
-  onAchievementUnlocked
+  onLevelUp
 }, ref) => {
   const [gameStats, setGameStats] = useState<GameStats>({
     level: 1,

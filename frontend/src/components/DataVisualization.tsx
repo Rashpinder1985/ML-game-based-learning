@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ScatterChart, Scatter, ResponsiveContainer } from 'recharts'
+import { Line, XAxis, YAxis, CartesianGrid, Tooltip, ScatterChart, Scatter, ResponsiveContainer } from 'recharts'
 import { motion } from 'framer-motion'
 
 interface DataPoint {
@@ -22,7 +22,6 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
   const [data, setData] = useState<DataPoint[]>([])
   const [predictions, setPredictions] = useState<DataPoint[]>([])
   const [polynomialDegree, setPolynomialDegree] = useState(1)
-  const [isInteractive, setIsInteractive] = useState(false)
   const [modelMetrics, setModelMetrics] = useState<any>(null)
 
   useEffect(() => {
