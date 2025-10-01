@@ -304,10 +304,6 @@ cd infra && docker-compose up -d
 4. Add tests
 5. Submit a pull request
 
-## 📄 License
 
-[Add your license here]
-
----
 
 **Ready to start learning?** Run `make up` and visit http://localhost:3000!
