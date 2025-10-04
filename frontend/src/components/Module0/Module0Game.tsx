@@ -241,6 +241,15 @@ const Module0Game: React.FC = () => {
   const currentChallengeData = challenges.find(c => c.id === gameState.currentChallenge)
   const CurrentChallengeComponent = currentChallengeData?.component || Challenge1
 
+  // Debug logging
+  console.log('Module0Game Debug:', {
+    user,
+    gameState,
+    currentChallengeData,
+    CurrentChallengeComponent,
+    challenges
+  })
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -340,20 +349,30 @@ const Module0Game: React.FC = () => {
 
               {/* Challenge Component */}
               <div className="min-h-[400px]">
-                <CurrentChallengeComponent
-                  challengeId={gameState.currentChallenge}
-                  onComplete={(challengeId, bonusXP) => completeChallenge(challengeId, bonusXP)}
-                  onFail={() => {
-                    setGameState(prev => ({
-                      ...prev,
-                      hearts: Math.max(0, prev.hearts - 1),
-                      streak: 0
-                    }))
-                    showToast('❌ Challenge failed! Try again.', 'error')
-                  }}
-                  hearts={gameState.hearts}
-                  streak={gameState.streak}
-                />
+                {CurrentChallengeComponent ? (
+                  <CurrentChallengeComponent
+                    challengeId={gameState.currentChallenge}
+                    onComplete={(challengeId, bonusXP) => completeChallenge(challengeId, bonusXP)}
+                    onFail={() => {
+                      setGameState(prev => ({
+                        ...prev,
+                        hearts: Math.max(0, prev.hearts - 1),
+                        streak: 0
+                      }))
+                      showToast('❌ Challenge failed! Try again.', 'error')
+                    }}
+                    hearts={gameState.hearts}
+                    streak={gameState.streak}
+                  />
+                ) : (
+                  <div className="text-center py-20">
+                    <h3 className="text-xl font-bold mb-4">Loading Challenge...</h3>
+                    <p className="text-gray-400">Challenge {gameState.currentChallenge}</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      CurrentChallengeComponent: {CurrentChallengeComponent ? 'Found' : 'Not Found'}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
