@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService, User } from '../services/auth';
+import { setAuthToken } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -34,6 +35,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     try {
       await authService.login({ email, password });
+      const token = authService.getToken();
+      setAuthToken(token);
       const userData = await authService.getCurrentUser();
       setUser(userData);
     } catch (error) {
@@ -54,6 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       await authService.logout();
+      setAuthToken(null);
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
@@ -63,10 +67,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = async () => {
     if (authService.isAuthenticated()) {
       try {
+        setAuthToken(authService.getToken());
         const userData = await authService.getCurrentUser();
         setUser(userData);
       } catch (error) {
         console.error('Failed to refresh user:', error);
+        setAuthToken(null);
         setUser(null);
       }
     }
@@ -76,10 +82,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuth = async () => {
       if (authService.isAuthenticated()) {
         try {
+          setAuthToken(authService.getToken());
           const userData = await authService.getCurrentUser();
           setUser(userData);
         } catch (error) {
           console.error('Failed to initialize auth:', error);
+          setAuthToken(null);
           await authService.logout();
         }
       }

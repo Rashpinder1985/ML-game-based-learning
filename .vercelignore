@@ -1,0 +1,8 @@
+backend/
+runner/
+infra/
+content/
+.venv/
+.DS_Store
+*.pyc
+__pycache__/

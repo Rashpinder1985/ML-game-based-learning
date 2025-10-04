@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Play, Send, Loader2, CheckCircle, XCircle, AlertCircle, User, LogOut } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Play, Send, Loader2, CheckCircle, XCircle, AlertCircle, LogOut } from 'lucide-react'
 import MonacoEditor from '@monaco-editor/react'
 import { apiService } from './services/api'
 import { Lesson } from './types'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthModal } from './components/Auth/AuthModal'
 import { UserDashboard } from './components/Dashboard/UserDashboard'
-import DebugApi from './components/DebugApi'
 
 // Import our new components
 import GameInterface, { GameInterfaceHandle } from './components/GameInterface'
@@ -20,7 +18,7 @@ function MainApp() {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [code, setCode] = useState('')
-  const [language, setLanguage] = useState('python')
+  const language = 'python'
   const [isRunning, setIsRunning] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<any>(null)
@@ -248,14 +246,245 @@ function MainApp() {
     )
   }
 
-  // Show user dashboard if selected
-  if (currentView === 'dashboard') {
-    return <UserDashboard />
-  }
+  const isDashboardView = currentView === 'dashboard'
+  const isModule0View = currentView === 'module0'
 
-  // Show Module 0 Game if selected
-  if (currentView === 'module0') {
-    return <Module0Game />
+  const renderMainContent = () => {
+    if (isDashboardView) {
+      return (
+        <div style={{
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '12px',
+          padding: '20px',
+          minHeight: '60vh'
+        }}>
+          <UserDashboard />
+        </div>
+      )
+    }
+
+    if (isModule0View) {
+      return <Module0Game />
+    }
+
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: currentView === 'lessons' ? '1fr' : currentView === 'code' ? '1fr 1fr' : '1fr',
+        gap: '20px',
+        height: 'calc(100vh - 200px)'
+      }}>
+        {/* Lessons Panel */}
+        {currentView === 'lessons' && (
+          <div style={{
+            background: 'rgba(255,255,255,0.05)',
+            borderRadius: '12px',
+            padding: '20px',
+            overflowY: 'auto'
+          }}>
+            <h2 style={{ fontSize: '24px', marginBottom: '20px', fontWeight: 'bold' }}>
+              📚 ML Learning Modules
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {lessons.map((lesson, index) => (
+                <LessonCard
+                  key={lesson.id}
+                  lesson={lesson}
+                  isSelected={selectedLesson?.id === lesson.id}
+                  isUnlocked={isLessonUnlocked(index)}
+                  completionStatus={getLessonCompletionStatus(lesson.id)}
+                  onClick={() => setSelectedLesson(lesson)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Code Editor Panel */}
+        {currentView === 'code' && selectedLesson && (
+          <>
+            <div style={{
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: '12px',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px'
+              }}>
+                <div>
+                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {selectedLesson.title}
+                  </h2>
+                  <p style={{ fontSize: '14px', opacity: 0.8 }}>
+                    {selectedLesson.module} • {selectedLesson.difficulty}
+                  </p>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '14px'
+                }}>
+                  {getStatusIcon()}
+                  <span>{getStatusText()}</span>
+                </div>
+              </div>
+
+              <div style={{ flex: 1, marginBottom: '20px' }}>
+                <MonacoEditor
+                  height="400px"
+                  defaultLanguage={language}
+                  value={code}
+                  onChange={(value) => setCode(value || '')}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                    roundedSelection: false,
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                  }}
+                />
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                marginBottom: '20px'
+              }}>
+                <button
+                  onClick={handleRun}
+                  disabled={isRunning || isSubmitting}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: isRunning ? '#666' : '#4CAF50',
+                    color: 'white',
+                    cursor: isRunning ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  <Play size={16} />
+                  {isRunning ? 'Running...' : 'Run Code'}
+                </button>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || isRunning}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: isSubmitting ? '#666' : '#2196F3',
+                    color: 'white',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  <Send size={16} />
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </button>
+              </div>
+
+              {(result || error || isRunning) && (
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  maxHeight: '200px',
+                  overflowY: 'auto'
+                }}>
+                  {error && (
+                    <div style={{ color: '#ff6b6b', marginBottom: '12px' }}>
+                      ❌ {error}
+                    </div>
+                  )}
+                  {result && (
+                    <div>
+                      <div style={{
+                        color: result.passed ? '#4CAF50' : '#ff6b6b',
+                        marginBottom: '8px',
+                        fontWeight: 'bold'
+                      }}>
+                        {result.passed ? '✅ Success!' : '❌ Failed'}
+                      </div>
+                      {result.logs && (
+                        <pre style={{
+                          whiteSpace: 'pre-wrap',
+                          fontSize: '12px',
+                          opacity: 0.9,
+                          marginBottom: '8px'
+                        }}>
+                          {result.logs}
+                        </pre>
+                      )}
+                      {result.metrics && (
+                        <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                          <div>⏱️ Execution time: {result.metrics.execution_time.toFixed(2)}s</div>
+                          <div>💾 Memory used: {result.metrics.memory_used.toFixed(1)}MB</div>
+                          <div>🖥️ CPU used: {result.metrics.cpu_used.toFixed(1)}%</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {isRunning && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Loader2 size={16} className="loading" />
+                      <span>Executing your code...</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Results Panel */}
+            <div style={{
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: '12px',
+              padding: '20px'
+            }}>
+              <h3 style={{ fontSize: '18px', marginBottom: '16px', fontWeight: 'bold' }}>
+                📊 Data Visualization
+              </h3>
+              {showVisualization ? (
+                <DataVisualization
+                  lessonId={selectedLesson.id}
+                  lessonTitle={selectedLesson.title}
+                  onVisualizationComplete={handleVisualizationComplete}
+                />
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '300px',
+                  opacity: 0.6,
+                  fontSize: '14px'
+                }}>
+                  Complete the code challenge to see visualization
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -271,9 +500,6 @@ function MainApp() {
           userId={user?.id.toString() || 'user_1'}
           onLevelUp={(level) => console.log('Level up!', level)}
         />
-
-        {/* Debug API Component */}
-        <DebugApi />
 
         {/* User Info and Navigation */}
         <div style={{
@@ -292,7 +518,7 @@ function MainApp() {
                 padding: '8px 16px',
                 borderRadius: '6px',
                 border: 'none',
-                background: currentView === 'dashboard' ? '#667eea' : 'transparent',
+                background: isDashboardView ? '#667eea' : 'transparent',
                 color: 'white',
                 cursor: 'pointer'
               }}
@@ -333,7 +559,7 @@ function MainApp() {
                 padding: '8px 16px',
                 borderRadius: '6px',
                 border: 'none',
-                background: 'transparent',
+                background: isModule0View ? '#667eea' : 'transparent',
                 color: 'white',
                 cursor: 'pointer'
               }}
@@ -368,221 +594,7 @@ function MainApp() {
         </div>
 
         {/* Main Content */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: currentView === 'lessons' ? '1fr' : currentView === 'code' ? '1fr 1fr' : '1fr',
-          gap: '20px',
-          height: 'calc(100vh - 200px)'
-        }}>
-          {/* Lessons Panel */}
-          {currentView === 'lessons' && (
-            <div style={{
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: '12px',
-              padding: '20px',
-              overflowY: 'auto'
-            }}>
-              <h2 style={{ fontSize: '24px', marginBottom: '20px', fontWeight: 'bold' }}>
-                📚 ML Learning Modules
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {lessons.map((lesson, index) => (
-                  <LessonCard
-                    key={lesson.id}
-                    lesson={lesson}
-                    isSelected={selectedLesson?.id === lesson.id}
-                    isUnlocked={isLessonUnlocked(index)}
-                    completionStatus={getLessonCompletionStatus(lesson.id)}
-                    onClick={() => setSelectedLesson(lesson)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Code Editor Panel */}
-          {currentView === 'code' && selectedLesson && (
-            <>
-              <div style={{
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: '12px',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '20px'
-                }}>
-                  <div>
-                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
-                      {selectedLesson.title}
-                    </h2>
-                    <p style={{ fontSize: '14px', opacity: 0.8 }}>
-                      {selectedLesson.module} • {selectedLesson.difficulty}
-                    </p>
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '14px'
-                  }}>
-                    {getStatusIcon()}
-                    <span>{getStatusText()}</span>
-                  </div>
-                </div>
-
-                <div style={{ flex: 1, marginBottom: '20px' }}>
-                  <MonacoEditor
-                    height="400px"
-                    defaultLanguage={language}
-                    value={code}
-                    onChange={(value) => setCode(value || '')}
-                    theme="vs-dark"
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 14,
-                      lineNumbers: 'on',
-                      roundedSelection: false,
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                    }}
-                  />
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  gap: '12px',
-                  marginBottom: '20px'
-                }}>
-                  <button
-                    onClick={handleRun}
-                    disabled={isRunning || isSubmitting}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 20px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: isRunning ? '#666' : '#4CAF50',
-                      color: 'white',
-                      cursor: isRunning ? 'not-allowed' : 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    <Play size={16} />
-                    {isRunning ? 'Running...' : 'Run Code'}
-                  </button>
-
-                  <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting || isRunning}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 20px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: isSubmitting ? '#666' : '#2196F3',
-                      color: 'white',
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    <Send size={16} />
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                  </button>
-                </div>
-
-                {(result || error || isRunning) && (
-                  <div style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    fontSize: '14px',
-                    maxHeight: '200px',
-                    overflowY: 'auto'
-                  }}>
-                    {error && (
-                      <div style={{ color: '#ff6b6b', marginBottom: '12px' }}>
-                        ❌ {error}
-                      </div>
-                    )}
-                    {result && (
-                      <div>
-                        <div style={{
-                          color: result.passed ? '#4CAF50' : '#ff6b6b',
-                          marginBottom: '8px',
-                          fontWeight: 'bold'
-                        }}>
-                          {result.passed ? '✅ Success!' : '❌ Failed'}
-                        </div>
-                        {result.logs && (
-                          <pre style={{
-                            whiteSpace: 'pre-wrap',
-                            fontSize: '12px',
-                            opacity: 0.9,
-                            marginBottom: '8px'
-                          }}>
-                            {result.logs}
-                          </pre>
-                        )}
-                        {result.metrics && (
-                          <div style={{ fontSize: '12px', opacity: 0.8 }}>
-                            <div>⏱️ Execution time: {result.metrics.execution_time.toFixed(2)}s</div>
-                            <div>💾 Memory used: {result.metrics.memory_used.toFixed(1)}MB</div>
-                            <div>🖥️ CPU used: {result.metrics.cpu_used.toFixed(1)}%</div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {isRunning && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Loader2 size={16} className="loading" />
-                        <span>Executing your code...</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Results Panel */}
-              <div style={{
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: '12px',
-                padding: '20px'
-              }}>
-                <h3 style={{ fontSize: '18px', marginBottom: '16px', fontWeight: 'bold' }}>
-                  📊 Data Visualization
-                </h3>
-                {showVisualization ? (
-                  <DataVisualization
-                    lesson={selectedLesson}
-                    onComplete={handleVisualizationComplete}
-                  />
-                ) : (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '300px',
-                    opacity: 0.6,
-                    fontSize: '14px'
-                  }}>
-                    Complete the code challenge to see visualization
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+        {renderMainContent()}
       </div>
     </div>
   )

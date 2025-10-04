@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, Trophy, Zap, ArrowLeft } from 'lucide-react'
+import { Trophy, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import Challenge1 from './challenges/Challenge1'
 import Challenge2 from './challenges/Challenge2'
@@ -108,7 +108,11 @@ const Module0Game: React.FC = () => {
     // Update user stats via API
     try {
       const token = localStorage.getItem('access_token')
-        await fetch('http://localhost:8002/api/v1/module0/challenge-complete', {
+      if (!token) {
+        return
+      }
+
+      await fetch('http://localhost:8002/api/v1/module0/challenge-complete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -137,44 +141,20 @@ const Module0Game: React.FC = () => {
     setTimeout(() => setToast(null), 3000)
   }, [])
 
-  const addXP = useCallback((amount: number, source?: string) => {
-    setGameState(prev => {
-      const newXP = prev.xp + amount
-      const newLevel = Math.floor(newXP / 100) + 1
-      const leveledUp = newLevel > prev.level
-
-      if (leveledUp) {
-        showToast(`🎉 Level Up! You're now level ${newLevel}!`, 'success')
-      }
-
-      return {
-        ...prev,
-        xp: newXP,
-        level: newLevel
-      }
-    })
-  }, [showToast])
-
-  const completeChallenge = useCallback(async (challengeId: number, success: boolean) => {
-    if (!success) {
-      setGameState(prev => ({
-        ...prev,
-        hearts: Math.max(0, prev.hearts - 1)
-      }))
-      showToast('💔 Challenge failed! You lost a heart.', 'error')
-      return
-    }
-
+  const completeChallenge = useCallback(async (challengeId: number, bonusXP: number = 0) => {
     const challenge = challenges.find(c => c.id === challengeId)
     if (!challenge) return
+
+    let xpAwarded = challenge.xp + (bonusXP || 0)
 
     setGameState(prev => {
       const newCompleted = new Set(prev.completedChallenges)
       newCompleted.add(challengeId)
       
       const streakMultiplier = Math.floor(prev.streak / 3) + 1
-      const bonusXP = challenge.xp * (streakMultiplier - 1)
-      const totalXP = challenge.xp + bonusXP
+      const streakBonus = challenge.xp * (streakMultiplier - 1)
+      const totalXP = challenge.xp + streakBonus + (bonusXP || 0)
+      xpAwarded = totalXP
       
       const newXP = prev.xp + totalXP
       const newLevel = Math.floor(newXP / 100) + 1
@@ -191,7 +171,7 @@ const Module0Game: React.FC = () => {
       }
 
       if (streakMultiplier > 1) {
-        showToast(`🔥 ${streakMultiplier}x Streak Bonus! +${bonusXP} XP`, 'success')
+        showToast(`🔥 ${streakMultiplier}x Streak Bonus! +${streakBonus} XP`, 'success')
       }
 
       const newState = {
@@ -211,22 +191,8 @@ const Module0Game: React.FC = () => {
       return newState
     })
 
-    showToast(`✅ Challenge ${challengeId} completed! +${challenge.xp} XP`, 'success')
+    showToast(`✅ Challenge ${challengeId} completed! +${xpAwarded} XP`, 'success')
   }, [saveGameState, showToast])
-
-  const unlockChallenge = useCallback(async (challengeId: number) => {
-    try {
-      const token = localStorage.getItem('access_token')
-      await fetch(`http://localhost:8002/api/v1/module0/unlock-challenge/${challengeId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      })
-    } catch (error) {
-      console.error('Failed to unlock challenge:', error)
-    }
-  }, [])
 
   const resetGame = useCallback(() => {
     if (window.confirm('Are you sure you want to reset your progress? This cannot be undone!')) {
@@ -352,14 +318,18 @@ const Module0Game: React.FC = () => {
                 {CurrentChallengeComponent ? (
                   <CurrentChallengeComponent
                     challengeId={gameState.currentChallenge}
-                    onComplete={(challengeId, bonusXP) => completeChallenge(challengeId, bonusXP)}
+                    onComplete={(id, bonus) => completeChallenge(id, bonus)}
                     onFail={() => {
-                      setGameState(prev => ({
-                        ...prev,
-                        hearts: Math.max(0, prev.hearts - 1),
-                        streak: 0
-                      }))
-                      showToast('❌ Challenge failed! Try again.', 'error')
+                      setGameState(prev => {
+                        const updatedState = {
+                          ...prev,
+                          hearts: Math.max(0, prev.hearts - 1),
+                          streak: 0
+                        }
+                        saveGameState(updatedState)
+                        return updatedState
+                      })
+                      showToast('💔 Challenge failed! You lost a heart.', 'error')
                     }}
                     hearts={gameState.hearts}
                     streak={gameState.streak}
@@ -388,7 +358,11 @@ const Module0Game: React.FC = () => {
             exit={{ opacity: 0, y: 50, scale: 0.5, transition: { duration: 0.2 } }}
             className="fixed bottom-4 right-4 z-50"
           >
-            <Toast message={toast.message} type={toast.type} />
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
           </motion.div>
         )}
       </AnimatePresence>

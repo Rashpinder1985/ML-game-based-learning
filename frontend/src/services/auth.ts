@@ -11,6 +11,12 @@ export interface User {
   badges: string[];
   last_login?: string;
   created_at: string;
+  game_stats?: {
+    hearts?: number;
+    max_streak?: number;
+    current_streak?: number;
+    challenges_completed?: number;
+  };
 }
 
 export interface LoginData {

@@ -14,7 +14,7 @@ import {
   RegisterRequest,
 } from '../types'
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:8000'
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:8002'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -34,29 +34,17 @@ export const setAuthToken = (token: string | null) => {
 export const apiService = {
   // Auth
   async register(payload: RegisterRequest): Promise<User> {
-    const response = await api.post<User>('/api/v1/register', payload)
+    const response = await api.post<User>('/api/v1/auth/register', payload)
     return response.data
   },
 
   async login(payload: LoginRequest): Promise<TokenResponse> {
-    const formData = new FormData()
-    formData.append('username', payload.email)
-    formData.append('password', payload.password)
-    
-    const response = await fetch(`${API_BASE_URL}/api/v1/login`, {
-      method: 'POST',
-      body: formData,
-    })
-    
-    if (!response.ok) {
-      throw new Error('Login failed')
-    }
-    
-    return response.json()
+    const response = await api.post<TokenResponse>('/api/v1/auth/login/json', payload)
+    return response.data
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await api.get<User>('/api/v1/me')
+    const response = await api.get<User>('/api/v1/auth/me')
     return response.data
   },
 

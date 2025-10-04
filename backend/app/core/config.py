@@ -10,7 +10,13 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+    ALLOWED_ORIGINS: str = (
+        "http://localhost:3000," \
+        "http://localhost:3001," \
+        "http://127.0.0.1:3000," \
+        "http://127.0.0.1:3001," \
+        "http://localhost:5173"
+    )
     
     # Runner
     RUNNER_URL: str = "http://runner:8000"

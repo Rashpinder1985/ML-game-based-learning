@@ -46,26 +46,46 @@ def setup_database():
             print(f"📋 Created tables: {', '.join(tables)}")
         
         print("📚 Inserting sample lessons...")
-        with engine.connect() as conn:
-            # Insert sample lessons if they don't exist
-            conn.execute(text("""
-                INSERT INTO lessons (title, description, content, difficulty, module, is_active)
-                VALUES 
-                    ('Introduction to Machine Learning', 
-                     'Learn the basics of ML and its applications',
-                     '# Introduction to Machine Learning\n\nMachine Learning is a subset of artificial intelligence that focuses on algorithms that can learn from data.',
-                     'beginner', 'Module 1', true),
-                    ('Linear Regression', 
-                     'Understand the fundamentals of linear regression',
-                     '# Linear Regression\n\nLinear regression is a statistical method used to model the relationship between variables.',
-                     'intermediate', 'Module 1', true),
-                    ('Classification with Decision Trees', 
-                     'Learn to build decision tree classifiers',
-                     '# Decision Trees\n\nDecision trees are a powerful machine learning algorithm for both classification and regression tasks.',
-                     'intermediate', 'Module 2', true)
-                ON CONFLICT (title) DO NOTHING
-            """))
-            conn.commit()
+        sample_lessons = [
+            {
+                "title": "Introduction to Machine Learning",
+                "description": "Learn the basics of ML and its applications",
+                "content": "# Introduction to Machine Learning\n\nMachine Learning is a subset of artificial intelligence that focuses on algorithms that can learn from data.",
+                "difficulty": "beginner",
+                "module": "Module 1",
+                "is_active": True,
+            },
+            {
+                "title": "Linear Regression",
+                "description": "Understand the fundamentals of linear regression",
+                "content": "# Linear Regression\n\nLinear regression is a statistical method used to model the relationship between variables.",
+                "difficulty": "intermediate",
+                "module": "Module 1",
+                "is_active": True,
+            },
+            {
+                "title": "Classification with Decision Trees",
+                "description": "Learn to build decision tree classifiers",
+                "content": "# Decision Trees\n\nDecision trees are a powerful machine learning algorithm for both classification and regression tasks.",
+                "difficulty": "intermediate",
+                "module": "Module 2",
+                "is_active": True,
+            },
+        ]
+
+        insert_stmt = text(
+            """
+            INSERT INTO lessons (title, description, content, difficulty, module, is_active)
+            SELECT :title, :description, :content, :difficulty, :module, :is_active
+            WHERE NOT EXISTS (
+                SELECT 1 FROM lessons WHERE title = :title
+            )
+            """
+        )
+
+        with engine.begin() as conn:
+            for lesson in sample_lessons:
+                conn.execute(insert_stmt, lesson)
         
         print("✅ Sample lessons inserted!")
         print("🎉 Database setup completed successfully!")
