@@ -77,7 +77,7 @@ chmod +x start_local.sh
 # Option 2: Start manually
 # Terminal 1 (Backend)
 cd backend
-python3 -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+python3 -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8002
 
 # Terminal 2 (Frontend)
 cd frontend
@@ -86,7 +86,7 @@ npm run dev
 
 ### 6. Access the Platform
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000/docs
+- **Backend API**: http://localhost:8002/docs
 - **Admin Dashboard**: http://localhost:3000/dashboard (after login)
 
 ## 🏗️ Architecture

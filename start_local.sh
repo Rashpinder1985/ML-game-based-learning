@@ -20,12 +20,12 @@ fi
 
 echo ""
 echo "🎯 Starting Backend Server (FastAPI)..."
-echo "   • API Documentation: http://localhost:8000/docs"
-echo "   • API Endpoint: http://localhost:8000/api/v1/lessons"
+echo "   • API Documentation: http://localhost:8002/docs"
+echo "   • API Endpoint: http://localhost:8002/api/v1/lessons"
 echo ""
 
 # Start backend in background
-cd backend && python3 -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000 &
+cd backend && python3 -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8002 &
 BACKEND_PID=$!
 
 echo "🎨 Starting Frontend Server (React + Vite)..."
