@@ -81,6 +81,11 @@ export interface User {
   email: string
   full_name?: string
   is_active: boolean
+  is_verified: boolean
+  total_xp: number
+  current_level: number
+  badges: string[]
+  last_login?: string
   created_at: string
   updated_at?: string
 }
@@ -97,4 +102,5 @@ export interface RegisterRequest extends LoginRequest {
 export interface TokenResponse {
   access_token: string
   token_type: string
+  expires_in: number
 }

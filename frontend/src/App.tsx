@@ -7,6 +7,7 @@ import { Lesson } from './types'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthModal } from './components/Auth/AuthModal'
 import { UserDashboard } from './components/Dashboard/UserDashboard'
+import DebugApi from './components/DebugApi'
 
 // Import our new components
 import GameInterface, { GameInterfaceHandle } from './components/GameInterface'
@@ -270,6 +271,9 @@ function MainApp() {
           userId={user?.id.toString() || 'user_1'}
           onLevelUp={(level) => console.log('Level up!', level)}
         />
+
+        {/* Debug API Component */}
+        <DebugApi />
 
         {/* User Info and Navigation */}
         <div style={{
