@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import lessons, submissions, jobs, progress, auth
+from app.api.routes import lessons, submissions, jobs, progress, auth, module0
 from app.core.config import settings
 from app.core.database import engine, Base
 
@@ -24,7 +24,8 @@ app.include_router(lessons.router, prefix="/api/v1", tags=["lessons"])
 app.include_router(submissions.router, prefix="/api/v1", tags=["submissions"])
 app.include_router(jobs.router, prefix="/api/v1", tags=["jobs"])
 app.include_router(progress.router, prefix="/api/v1", tags=["progress"])
-app.include_router(auth.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1", tags=["authentication"])
+app.include_router(module0.router, prefix="/api/v1/module0", tags=["module0"])
 
 @app.on_event("startup")
 async def startup_event():

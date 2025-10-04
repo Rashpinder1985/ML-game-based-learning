@@ -4,7 +4,7 @@ import json
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/ml_learning"
+    DATABASE_URL: str = "postgresql://rashpinderkaur@localhost:5432/ml_learning"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379"

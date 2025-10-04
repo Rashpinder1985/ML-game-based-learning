@@ -1,3 +1,3 @@
-from . import auth, lessons, submissions, jobs, progress
+from . import auth, lessons, submissions, jobs, progress, module0
 
-__all__ = ["auth", "lessons", "submissions", "jobs", "progress"]
+__all__ = ["auth", "lessons", "submissions", "jobs", "progress", "module0"]
