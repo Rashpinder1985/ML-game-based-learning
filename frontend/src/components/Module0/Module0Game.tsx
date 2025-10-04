@@ -108,7 +108,7 @@ const Module0Game: React.FC = () => {
     // Update user stats via API
     try {
       const token = localStorage.getItem('access_token')
-      await fetch('http://localhost:8000/api/v1/module0/challenge-complete', {
+        await fetch('http://localhost:8002/api/v1/module0/challenge-complete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ const Module0Game: React.FC = () => {
   const unlockChallenge = useCallback(async (challengeId: number) => {
     try {
       const token = localStorage.getItem('access_token')
-      await fetch(`http://localhost:8000/api/v1/module0/unlock-challenge/${challengeId}`, {
+      await fetch(`http://localhost:8002/api/v1/module0/unlock-challenge/${challengeId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -342,8 +342,17 @@ const Module0Game: React.FC = () => {
               <div className="min-h-[400px]">
                 <CurrentChallengeComponent
                   challengeId={gameState.currentChallenge}
-                  onComplete={(success) => completeChallenge(gameState.currentChallenge, success)}
-                  onUnlock={unlockChallenge}
+                  onComplete={(challengeId, bonusXP) => completeChallenge(challengeId, bonusXP)}
+                  onFail={() => {
+                    setGameState(prev => ({
+                      ...prev,
+                      hearts: Math.max(0, prev.hearts - 1),
+                      streak: 0
+                    }))
+                    showToast('❌ Challenge failed! Try again.', 'error')
+                  }}
+                  hearts={gameState.hearts}
+                  streak={gameState.streak}
                 />
               </div>
             </div>
